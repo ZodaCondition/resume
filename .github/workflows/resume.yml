@@ -7,7 +7,7 @@ on:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  contents: write  # Required to push changes back to repository
   pages: write
   id-token: write
 
@@ -27,6 +27,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
       
       - name: Setup GitHub CLI
         run: |
@@ -67,7 +74,10 @@ jobs:
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>PDF Repository</title>
+              <title>Resume Hub - Professional Documents</title>
+              <link rel="preconnect" href="https://fonts.googleapis.com">
+              <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
               <style>
                   * {
                       margin: 0;
@@ -76,32 +86,147 @@ jobs:
                   }
                   
                   body {
-                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                       line-height: 1.6;
                       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                       min-height: 100vh;
-                      padding: 2rem;
+                      padding: 2rem 1rem;
+                      position: relative;
+                      overflow-x: hidden;
+                  }
+                  
+                  /* Animated background elements */
+                  body::before {
+                      content: '';
+                      position: fixed;
+                      top: -50%;
+                      left: -50%;
+                      width: 200%;
+                      height: 200%;
+                      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+                      background-size: 50px 50px;
+                      animation: backgroundMove 20s linear infinite;
+                      z-index: 0;
+                  }
+                  
+                  @keyframes backgroundMove {
+                      0% { transform: translate(0, 0); }
+                      100% { transform: translate(50px, 50px); }
                   }
                   
                   .container {
-                      max-width: 800px;
+                      max-width: 900px;
                       margin: 0 auto;
-                      background: white;
-                      border-radius: 12px;
-                      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-                      padding: 2.5rem;
+                      background: rgba(255, 255, 255, 0.98);
+                      border-radius: 24px;
+                      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+                      padding: 3rem 2.5rem;
+                      position: relative;
+                      z-index: 1;
+                      backdrop-filter: blur(10px);
+                  }
+                  
+                  .header {
+                      text-align: center;
+                      margin-bottom: 3rem;
+                      position: relative;
+                  }
+                  
+                  .logo {
+                      width: 80px;
+                      height: 80px;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      border-radius: 20px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      margin: 0 auto 1.5rem;
+                      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+                      transform: rotate(-5deg);
+                      transition: transform 0.3s ease;
+                  }
+                  
+                  .logo:hover {
+                      transform: rotate(0deg) scale(1.05);
+                  }
+                  
+                  .logo svg {
+                      width: 45px;
+                      height: 45px;
+                      fill: white;
                   }
                   
                   h1 {
-                      color: #333;
-                      margin-bottom: 0.5rem;
-                      font-size: 2rem;
+                      color: #1a202c;
+                      margin-bottom: 0.75rem;
+                      font-size: 2.5rem;
+                      font-weight: 700;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      -webkit-background-clip: text;
+                      -webkit-text-fill-color: transparent;
+                      background-clip: text;
                   }
                   
                   .subtitle {
-                      color: #666;
-                      margin-bottom: 2rem;
+                      color: #64748b;
+                      font-size: 1.1rem;
+                      font-weight: 500;
+                      margin-bottom: 0.5rem;
+                  }
+                  
+                  .description {
+                      color: #94a3b8;
                       font-size: 0.95rem;
+                      max-width: 600px;
+                      margin: 0 auto;
+                  }
+                  
+                  .stats {
+                      display: flex;
+                      justify-content: center;
+                      gap: 2rem;
+                      margin: 2rem 0;
+                      flex-wrap: wrap;
+                  }
+                  
+                  .stat-item {
+                      text-align: center;
+                      padding: 1rem 1.5rem;
+                      background: #f8fafc;
+                      border-radius: 12px;
+                      min-width: 120px;
+                  }
+                  
+                  .stat-number {
+                      font-size: 2rem;
+                      font-weight: 700;
+                      color: #667eea;
+                      display: block;
+                  }
+                  
+                  .stat-label {
+                      font-size: 0.85rem;
+                      color: #64748b;
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                  }
+                  
+                  .section-title {
+                      font-size: 1.25rem;
+                      font-weight: 600;
+                      color: #1a202c;
+                      margin-bottom: 1.5rem;
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                  }
+                  
+                  .section-title::before {
+                      content: '';
+                      width: 4px;
+                      height: 24px;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      border-radius: 2px;
                   }
                   
                   .pdf-list {
@@ -109,42 +234,68 @@ jobs:
                   }
                   
                   .pdf-item {
-                      background: #f8f9fa;
-                      border: 1px solid #e9ecef;
-                      border-radius: 8px;
-                      margin-bottom: 1rem;
-                      transition: all 0.3s ease;
+                      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                      border: 2px solid #e2e8f0;
+                      border-radius: 16px;
+                      margin-bottom: 1.25rem;
+                      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                      position: relative;
+                      overflow: hidden;
+                  }
+                  
+                  .pdf-item::before {
+                      content: '';
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+                      opacity: 0;
+                      transition: opacity 0.4s ease;
                   }
                   
                   .pdf-item:hover {
-                      transform: translateY(-2px);
-                      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                      transform: translateY(-4px);
+                      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
                       border-color: #667eea;
+                  }
+                  
+                  .pdf-item:hover::before {
+                      opacity: 1;
                   }
                   
                   .pdf-link {
                       display: flex;
                       align-items: center;
-                      padding: 1.25rem;
+                      padding: 1.5rem;
                       text-decoration: none;
-                      color: #333;
+                      color: #1a202c;
+                      position: relative;
+                      z-index: 1;
                   }
                   
                   .pdf-icon {
-                      width: 40px;
-                      height: 40px;
-                      background: #667eea;
-                      border-radius: 8px;
+                      width: 56px;
+                      height: 56px;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      border-radius: 14px;
                       display: flex;
                       align-items: center;
                       justify-content: center;
-                      margin-right: 1rem;
+                      margin-right: 1.25rem;
                       flex-shrink: 0;
+                      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+                      transition: transform 0.3s ease;
+                  }
+                  
+                  .pdf-item:hover .pdf-icon {
+                      transform: scale(1.1) rotate(5deg);
                   }
                   
                   .pdf-icon svg {
-                      width: 24px;
-                      height: 24px;
+                      width: 30px;
+                      height: 30px;
                       fill: white;
                   }
                   
@@ -154,70 +305,242 @@ jobs:
                   
                   .pdf-name {
                       font-weight: 600;
-                      color: #333;
-                      margin-bottom: 0.25rem;
+                      color: #1a202c;
+                      margin-bottom: 0.5rem;
+                      font-size: 1.1rem;
+                  }
+                  
+                  .pdf-meta {
+                      display: flex;
+                      gap: 1.5rem;
+                      align-items: center;
                   }
                   
                   .pdf-size {
-                      font-size: 0.85rem;
-                      color: #666;
+                      font-size: 0.9rem;
+                      color: #64748b;
+                      display: flex;
+                      align-items: center;
+                      gap: 0.4rem;
                   }
                   
-                  .download-icon {
-                      width: 20px;
-                      height: 20px;
+                  .pdf-size::before {
+                      content: '📊';
+                      font-size: 0.85rem;
+                  }
+                  
+                  .pdf-badge {
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      padding: 0.25rem 0.75rem;
+                      border-radius: 6px;
+                      font-size: 0.75rem;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                  }
+                  
+                  .action-buttons {
+                      display: flex;
+                      gap: 0.75rem;
                       flex-shrink: 0;
                   }
                   
-                  .download-icon svg {
-                      fill: #667eea;
+                  .btn {
+                      padding: 0.75rem 1rem;
+                      border-radius: 10px;
+                      text-decoration: none;
+                      font-weight: 600;
+                      font-size: 0.9rem;
+                      transition: all 0.3s ease;
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      border: none;
+                      cursor: pointer;
+                  }
+                  
+                  .btn-primary {
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                  }
+                  
+                  .btn-primary:hover {
+                      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+                      transform: translateY(-2px);
+                  }
+                  
+                  .btn-secondary {
+                      background: white;
+                      color: #667eea;
+                      border: 2px solid #667eea;
+                  }
+                  
+                  .btn-secondary:hover {
+                      background: #667eea;
+                      color: white;
                   }
                   
                   .empty-state {
                       text-align: center;
-                      padding: 3rem 1rem;
-                      color: #666;
+                      padding: 4rem 2rem;
+                      color: #64748b;
+                  }
+                  
+                  .empty-state svg {
+                      width: 80px;
+                      height: 80px;
+                      margin: 0 auto 1.5rem;
+                      opacity: 0.5;
+                  }
+                  
+                  .empty-state h3 {
+                      font-size: 1.5rem;
+                      color: #1a202c;
+                      margin-bottom: 0.5rem;
                   }
                   
                   .footer {
-                      margin-top: 2rem;
-                      padding-top: 1.5rem;
-                      border-top: 1px solid #e9ecef;
-                      text-align: center;
-                      color: #666;
-                      font-size: 0.85rem;
+                      margin-top: 3rem;
+                      padding-top: 2rem;
+                      border-top: 2px solid #e2e8f0;
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      flex-wrap: wrap;
+                      gap: 1rem;
                   }
                   
-                  .footer a {
+                  .footer-info {
+                      color: #64748b;
+                      font-size: 0.9rem;
+                  }
+                  
+                  .footer-info a {
                       color: #667eea;
                       text-decoration: none;
+                      font-weight: 600;
+                      transition: color 0.3s ease;
                   }
                   
-                  .footer a:hover {
-                      text-decoration: underline;
+                  .footer-info a:hover {
+                      color: #764ba2;
+                  }
+                  
+                  .footer-badge {
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      background: #f8fafc;
+                      padding: 0.5rem 1rem;
+                      border-radius: 8px;
+                      font-size: 0.85rem;
+                      color: #64748b;
+                  }
+                  
+                  .pulse {
+                      width: 8px;
+                      height: 8px;
+                      background: #10b981;
+                      border-radius: 50%;
+                      animation: pulse 2s infinite;
+                  }
+                  
+                  @keyframes pulse {
+                      0%, 100% {
+                          opacity: 1;
+                          transform: scale(1);
+                      }
+                      50% {
+                          opacity: 0.5;
+                          transform: scale(1.2);
+                      }
+                  }
+                  
+                  @media (max-width: 768px) {
+                      .container {
+                          padding: 2rem 1.5rem;
+                      }
+                      
+                      h1 {
+                          font-size: 2rem;
+                      }
+                      
+                      .pdf-link {
+                          flex-direction: column;
+                          text-align: center;
+                          gap: 1rem;
+                      }
+                      
+                      .pdf-icon {
+                          margin-right: 0;
+                      }
+                      
+                      .action-buttons {
+                          width: 100%;
+                      }
+                      
+                      .btn {
+                          flex: 1;
+                          justify-content: center;
+                      }
+                      
+                      .footer {
+                          flex-direction: column;
+                          text-align: center;
+                      }
                   }
               </style>
           </head>
           <body>
               <div class="container">
-                  <h1>📄 PDF Repository</h1>
-                  <p class="subtitle">Available documents from GourangaDasSamrat/latex-resume-ci</p>
+                  <div class="header">
+                      <div class="logo">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                              <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H13V12L11,16H14V19H10Z"/>
+                          </svg>
+                      </div>
+                      <h1>Resume Hub</h1>
+                      <p class="subtitle">আমার Professional Documents এর Collection</p>
+                      <p class="description">সকল resume, cover letter এবং অন্যান্য professional documents এক জায়গায়</p>
+                  </div>
+                  
+                  <div class="stats">
+                      <div class="stat-item">
+                          <span class="stat-number" id="total-docs">0</span>
+                          <span class="stat-label">Documents</span>
+                      </div>
+                      <div class="stat-item">
+                          <span class="stat-number" id="total-size">0 KB</span>
+                          <span class="stat-label">Total Size</span>
+                      </div>
+                      <div class="stat-item">
+                          <span class="stat-number" id="last-update">Today</span>
+                          <span class="stat-label">Last Update</span>
+                      </div>
+                  </div>
+                  
+                  <h2 class="section-title">📂 Available Documents</h2>
                   
                   <ul class="pdf-list" id="pdf-list">
                       <!-- PDFs will be inserted here -->
                   </ul>
                   
                   <div class="footer">
-                      Source: <a href="https://github.com/GourangaDasSamrat/latex-resume-ci" target="_blank" rel="noopener">GourangaDasSamrat/latex-resume-ci</a>
-                      <br>
-                      Last updated: <span id="last-updated"></span>
+                      <div class="footer-info">
+                          Powered by <a href="https://github.com/GourangaDasSamrat/latex-resume-ci" target="_blank" rel="noopener">LaTeX Resume CI</a>
+                          <br>
+                          <small>🚀 Automatically updated from latest releases</small>
+                      </div>
+                      <div class="footer-badge">
+                          <div class="pulse"></div>
+                          <span>Live & Updated</span>
+                      </div>
                   </div>
               </div>
               
               <script>
-                  // Display last updated time
-                  document.getElementById('last-updated').textContent = new Date().toLocaleString();
-                  
                   // Function to format file size
                   function formatFileSize(bytes) {
                       if (bytes === 0) return '0 Bytes';
@@ -227,10 +550,22 @@ jobs:
                       return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
                   }
                   
+                  // Function to parse size string to bytes
+                  function parseSizeToBytes(sizeStr) {
+                      const match = sizeStr.match(/^([\d.]+)\s*(\w+)$/);
+                      if (!match) return 0;
+                      const value = parseFloat(match[1]);
+                      const unit = match[2].toUpperCase();
+                      const units = { 'BYTES': 1, 'KB': 1024, 'MB': 1024*1024, 'GB': 1024*1024*1024 };
+                      return value * (units[unit] || 1);
+                  }
+                  
                   // PDF icon SVG
                   const pdfIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.5,15C15.5,16.38 14.21,17.5 12.75,17.5C11.29,17.5 10,16.38 10,15V12.5H11.5V15C11.5,15.55 12.06,16 12.75,16C13.44,16 14,15.55 14,15V11H15.5V15M18.5,11H17V17H15.5V11H14V9.5H18.5V11M10,11H8.5V17H7V11H5.5V9.5H10V11Z"/></svg>`;
                   
-                  const downloadIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>`;
+                  const downloadIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor;"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>`;
+                  
+                  const viewIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
                   
                   // Fetch and display PDF files
                   async function loadPDFs() {
@@ -241,33 +576,71 @@ jobs:
                           const pdfList = document.getElementById('pdf-list');
                           
                           if (pdfs.length === 0) {
-                              pdfList.innerHTML = '<div class="empty-state">No PDF files available yet.</div>';
+                              pdfList.innerHTML = `
+                                  <div class="empty-state">
+                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                          <path d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V5H19V19M17,17H7V16H17V17M17,15H7V14H17V15M17,12H7V7H17V12Z"/>
+                                      </svg>
+                                      <h3>কোনো document এখনো নেই</h3>
+                                      <p>শীঘ্রই resume এবং অন্যান্য documents যোগ হবে...</p>
+                                  </div>
+                              `;
                               return;
                           }
                           
-                          pdfs.forEach(pdf => {
+                          // Update stats
+                          document.getElementById('total-docs').textContent = pdfs.length;
+                          const totalBytes = pdfs.reduce((sum, pdf) => sum + parseSizeToBytes(pdf.size), 0);
+                          document.getElementById('total-size').textContent = formatFileSize(totalBytes);
+                          
+                          // Display PDFs
+                          pdfs.forEach((pdf, index) => {
                               const li = document.createElement('li');
                               li.className = 'pdf-item';
                               
+                              // Determine badge text
+                              let badgeText = 'PDF';
+                              if (pdf.name.toLowerCase().includes('resume')) badgeText = 'Resume';
+                              else if (pdf.name.toLowerCase().includes('cover')) badgeText = 'Cover Letter';
+                              else if (pdf.name.toLowerCase().includes('cv')) badgeText = 'CV';
+                              
                               li.innerHTML = `
-                                  <a href="${pdf.name}" class="pdf-link" download>
+                                  <div class="pdf-link">
                                       <div class="pdf-icon">${pdfIconSVG}</div>
                                       <div class="pdf-info">
                                           <div class="pdf-name">${pdf.name}</div>
-                                          <div class="pdf-size">${pdf.size}</div>
+                                          <div class="pdf-meta">
+                                              <div class="pdf-size">${pdf.size}</div>
+                                              <div class="pdf-badge">${badgeText}</div>
+                                          </div>
                                       </div>
-                                      <div class="download-icon">${downloadIconSVG}</div>
-                                  </a>
+                                      <div class="action-buttons">
+                                          <a href="${pdf.name}" class="btn btn-secondary" target="_blank">
+                                              ${viewIconSVG}
+                                              <span>View</span>
+                                          </a>
+                                          <a href="${pdf.name}" class="btn btn-primary" download>
+                                              ${downloadIconSVG}
+                                              <span>Download</span>
+                                          </a>
+                                      </div>
+                                  </div>
                               `;
                               
                               pdfList.appendChild(li);
                           });
+                          
                       } catch (error) {
                           console.error('Error loading PDFs:', error);
                           document.getElementById('pdf-list').innerHTML = 
-                              '<div class="empty-state">Error loading PDF list.</div>';
+                              '<div class="empty-state"><h3>Error loading documents</h3><p>Please try again later.</p></div>';
                       }
                   }
+                  
+                  // Update last update time
+                  const now = new Date();
+                  const today = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                  document.getElementById('last-update').textContent = today;
                   
                   loadPDFs();
               </script>
@@ -325,6 +698,28 @@ jobs:
           cd pdf-root
           echo "Files in deployment root:"
           ls -lah
+      
+      - name: Copy files to repository root
+        run: |
+          # Copy generated files to repository root for committing
+          cp pdf-root/index.html ./
+          cp pdf-root/pdfs.json ./
+          cp pdf-root/*.pdf ./ 2>/dev/null || echo "No PDFs to copy"
+          
+          echo "Files copied to repository root"
+          ls -lah
+      
+      - name: Commit and push to repository
+        run: |
+          git add index.html pdfs.json *.pdf 2>/dev/null || true
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "🤖 Auto-update: Latest PDFs from release [$(date +'%Y-%m-%d %H:%M:%S')]"
+            git push
+            echo "✅ Changes pushed to repository"
+          fi
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
