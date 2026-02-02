@@ -285,15 +285,16 @@ jobs:
           echo "[" > pdfs.json
           
           first=true
-          for pdf in *.pdf 2>/dev/null; do
+          shopt -s nullglob
+          for pdf in *.pdf; do
               if [ -f "$pdf" ]; then
-                  # Get file size
-                  size=$(stat -f%z "$pdf" 2>/dev/null || stat -c%s "$pdf" 2>/dev/null || echo "0")
+                  # Get file size (works on Linux)
+                  size=$(stat -c%s "$pdf" 2>/dev/null || echo "0")
                   
                   # Format size
-                  if [ $size -lt 1024 ]; then
+                  if [ "$size" -lt 1024 ]; then
                       size_formatted="${size} Bytes"
-                  elif [ $size -lt 1048576 ]; then
+                  elif [ "$size" -lt 1048576 ]; then
                       size_formatted="$(( size / 1024 )) KB"
                   else
                       size_formatted="$(( size / 1048576 )) MB"
