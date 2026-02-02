@@ -1,0 +1,338 @@
+name: Fetch and Host PDFs on GitHub Pages
+
+on:
+  workflow_dispatch:  # Manual trigger
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC (optional)
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  fetch-and-deploy:
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup GitHub CLI
+        run: |
+          # Verify gh CLI is available
+          gh --version
+      
+      - name: Create root directory for PDFs
+        run: |
+          mkdir -p pdf-root
+          cd pdf-root
+      
+      - name: Download PDF assets from latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd pdf-root
+          
+          echo "Fetching latest release from GourangaDasSamrat/latex-resume-ci..."
+          
+          # Download all PDF files from the latest release
+          gh release download \
+            --repo GourangaDasSamrat/latex-resume-ci \
+            --pattern "*.pdf" \
+            --dir . \
+            || echo "Warning: No PDF files found or download failed"
+          
+          # List downloaded files
+          echo "Downloaded PDF files:"
+          ls -lh *.pdf 2>/dev/null || echo "No PDF files downloaded"
+      
+      - name: Generate index.html
+        run: |
+          cd pdf-root
+          
+          cat > index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>PDF Repository</title>
+              <style>
+                  * {
+                      margin: 0;
+                      padding: 0;
+                      box-sizing: border-box;
+                  }
+                  
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                      line-height: 1.6;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      min-height: 100vh;
+                      padding: 2rem;
+                  }
+                  
+                  .container {
+                      max-width: 800px;
+                      margin: 0 auto;
+                      background: white;
+                      border-radius: 12px;
+                      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                      padding: 2.5rem;
+                  }
+                  
+                  h1 {
+                      color: #333;
+                      margin-bottom: 0.5rem;
+                      font-size: 2rem;
+                  }
+                  
+                  .subtitle {
+                      color: #666;
+                      margin-bottom: 2rem;
+                      font-size: 0.95rem;
+                  }
+                  
+                  .pdf-list {
+                      list-style: none;
+                  }
+                  
+                  .pdf-item {
+                      background: #f8f9fa;
+                      border: 1px solid #e9ecef;
+                      border-radius: 8px;
+                      margin-bottom: 1rem;
+                      transition: all 0.3s ease;
+                  }
+                  
+                  .pdf-item:hover {
+                      transform: translateY(-2px);
+                      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                      border-color: #667eea;
+                  }
+                  
+                  .pdf-link {
+                      display: flex;
+                      align-items: center;
+                      padding: 1.25rem;
+                      text-decoration: none;
+                      color: #333;
+                  }
+                  
+                  .pdf-icon {
+                      width: 40px;
+                      height: 40px;
+                      background: #667eea;
+                      border-radius: 8px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      margin-right: 1rem;
+                      flex-shrink: 0;
+                  }
+                  
+                  .pdf-icon svg {
+                      width: 24px;
+                      height: 24px;
+                      fill: white;
+                  }
+                  
+                  .pdf-info {
+                      flex-grow: 1;
+                  }
+                  
+                  .pdf-name {
+                      font-weight: 600;
+                      color: #333;
+                      margin-bottom: 0.25rem;
+                  }
+                  
+                  .pdf-size {
+                      font-size: 0.85rem;
+                      color: #666;
+                  }
+                  
+                  .download-icon {
+                      width: 20px;
+                      height: 20px;
+                      flex-shrink: 0;
+                  }
+                  
+                  .download-icon svg {
+                      fill: #667eea;
+                  }
+                  
+                  .empty-state {
+                      text-align: center;
+                      padding: 3rem 1rem;
+                      color: #666;
+                  }
+                  
+                  .footer {
+                      margin-top: 2rem;
+                      padding-top: 1.5rem;
+                      border-top: 1px solid #e9ecef;
+                      text-align: center;
+                      color: #666;
+                      font-size: 0.85rem;
+                  }
+                  
+                  .footer a {
+                      color: #667eea;
+                      text-decoration: none;
+                  }
+                  
+                  .footer a:hover {
+                      text-decoration: underline;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>📄 PDF Repository</h1>
+                  <p class="subtitle">Available documents from GourangaDasSamrat/latex-resume-ci</p>
+                  
+                  <ul class="pdf-list" id="pdf-list">
+                      <!-- PDFs will be inserted here -->
+                  </ul>
+                  
+                  <div class="footer">
+                      Source: <a href="https://github.com/GourangaDasSamrat/latex-resume-ci" target="_blank" rel="noopener">GourangaDasSamrat/latex-resume-ci</a>
+                      <br>
+                      Last updated: <span id="last-updated"></span>
+                  </div>
+              </div>
+              
+              <script>
+                  // Display last updated time
+                  document.getElementById('last-updated').textContent = new Date().toLocaleString();
+                  
+                  // Function to format file size
+                  function formatFileSize(bytes) {
+                      if (bytes === 0) return '0 Bytes';
+                      const k = 1024;
+                      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                      const i = Math.floor(Math.log(bytes) / Math.log(k));
+                      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+                  }
+                  
+                  // PDF icon SVG
+                  const pdfIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.5,15C15.5,16.38 14.21,17.5 12.75,17.5C11.29,17.5 10,16.38 10,15V12.5H11.5V15C11.5,15.55 12.06,16 12.75,16C13.44,16 14,15.55 14,15V11H15.5V15M18.5,11H17V17H15.5V11H14V9.5H18.5V11M10,11H8.5V17H7V11H5.5V9.5H10V11Z"/></svg>`;
+                  
+                  const downloadIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>`;
+                  
+                  // Fetch and display PDF files
+                  async function loadPDFs() {
+                      try {
+                          const response = await fetch('pdfs.json');
+                          const pdfs = await response.json();
+                          
+                          const pdfList = document.getElementById('pdf-list');
+                          
+                          if (pdfs.length === 0) {
+                              pdfList.innerHTML = '<div class="empty-state">No PDF files available yet.</div>';
+                              return;
+                          }
+                          
+                          pdfs.forEach(pdf => {
+                              const li = document.createElement('li');
+                              li.className = 'pdf-item';
+                              
+                              li.innerHTML = `
+                                  <a href="${pdf.name}" class="pdf-link" download>
+                                      <div class="pdf-icon">${pdfIconSVG}</div>
+                                      <div class="pdf-info">
+                                          <div class="pdf-name">${pdf.name}</div>
+                                          <div class="pdf-size">${pdf.size}</div>
+                                      </div>
+                                      <div class="download-icon">${downloadIconSVG}</div>
+                                  </a>
+                              `;
+                              
+                              pdfList.appendChild(li);
+                          });
+                      } catch (error) {
+                          console.error('Error loading PDFs:', error);
+                          document.getElementById('pdf-list').innerHTML = 
+                              '<div class="empty-state">Error loading PDF list.</div>';
+                      }
+                  }
+                  
+                  loadPDFs();
+              </script>
+          </body>
+          </html>
+          EOF
+          
+          echo "index.html generated successfully"
+      
+      - name: Create PDFs metadata JSON
+        run: |
+          cd pdf-root
+          
+          # Create JSON file with PDF metadata
+          echo "[" > pdfs.json
+          
+          first=true
+          for pdf in *.pdf 2>/dev/null; do
+              if [ -f "$pdf" ]; then
+                  # Get file size
+                  size=$(stat -f%z "$pdf" 2>/dev/null || stat -c%s "$pdf" 2>/dev/null || echo "0")
+                  
+                  # Format size
+                  if [ $size -lt 1024 ]; then
+                      size_formatted="${size} Bytes"
+                  elif [ $size -lt 1048576 ]; then
+                      size_formatted="$(( size / 1024 )) KB"
+                  else
+                      size_formatted="$(( size / 1048576 )) MB"
+                  fi
+                  
+                  # Add comma if not first entry
+                  if [ "$first" = false ]; then
+                      echo "," >> pdfs.json
+                  fi
+                  first=false
+                  
+                  # Add JSON entry
+                  echo "  {" >> pdfs.json
+                  echo "    \"name\": \"$pdf\"," >> pdfs.json
+                  echo "    \"size\": \"$size_formatted\"" >> pdfs.json
+                  echo -n "  }" >> pdfs.json
+              fi
+          done
+          
+          echo "" >> pdfs.json
+          echo "]" >> pdfs.json
+          
+          echo "pdfs.json created successfully"
+          cat pdfs.json
+      
+      - name: List all files in root
+        run: |
+          cd pdf-root
+          echo "Files in deployment root:"
+          ls -lah
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'pdf-root'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
