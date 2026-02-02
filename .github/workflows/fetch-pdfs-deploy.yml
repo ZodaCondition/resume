@@ -34,9 +34,7 @@ jobs:
           gh --version
       
       - name: Create root directory for PDFs
-        run: |
-          mkdir -p pdf-root
-          cd pdf-root
+        run: mkdir -p pdf-root
       
       - name: Download PDF assets from latest release
         env:
@@ -713,7 +711,7 @@ jobs:
               </script>
           </body>
           </html>
-HTML_EOF
+          HTML_EOF
           
           echo "index.html generated successfully"
       
